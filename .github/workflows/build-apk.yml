@@ -23,7 +23,7 @@ jobs:
       - name: Gradle kurulumu
         uses: gradle/actions/setup-gradle@v4
 
-            - name: Gradle Wrapper çalıştırma izni
+      - name: Gradle Wrapper çalıştırma izni
         run: chmod +x gradlew
 
       - name: APK oluştur
