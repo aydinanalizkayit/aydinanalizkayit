@@ -37,25 +37,32 @@ public class MainActivity extends AppCompatActivity {
         settings.setMediaPlaybackRequiresUserGesture(false);
 
         webView.setWebViewClient(new WebViewClient());
+
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onGeolocationPermissionsShowPrompt(
-                    String origin, GeolocationPermissions.Callback callback) {
+                    String origin,
+                    GeolocationPermissions.Callback callback) {
+
                 callback.invoke(origin, true, false);
             }
         });
 
         webView.addJavascriptInterface(new AndroidNavBridge(), "AndroidNav");
+
         webView.loadUrl("file:///android_asset/index.html");
 
         requestPermissionsIfNeeded();
     }
 
     private void requestPermissionsIfNeeded() {
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            boolean fine = ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED;
+
+            boolean fine = ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED;
 
             if (!fine) {
                 ActivityCompat.requestPermissions(
@@ -70,12 +77,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (Build.VERSION.SDK_INT >= 33 &&
-                ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.POST_NOTIFICATIONS)
-                        != PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED) {
+
             ActivityCompat.requestPermissions(
                     this,
-                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    new String[]{
+                            Manifest.permission.POST_NOTIFICATIONS
+                    },
                     NOTIFICATION_REQUEST
             );
         }
@@ -85,32 +96,55 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void startService() {
-            Intent intent = new Intent(MainActivity.this, NavigationService.class);
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    NavigationService.class
+            );
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ContextCompat.startForegroundService(MainActivity.this, intent);
+
+                ContextCompat.startForegroundService(
+                        MainActivity.this,
+                        intent
+                );
+
             } else {
-                startService(intent);
+
+                MainActivity.this.startService(intent);
             }
         }
 
         @JavascriptInterface
         public void stopService() {
-            stopService(new Intent(MainActivity.this, NavigationService.class));
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    NavigationService.class
+            );
+
+            MainActivity.this.stopService(intent);
         }
 
         @JavascriptInterface
         public void saveHazards(String json) {
-            SharedPreferences prefs = getSharedPreferences("nav", MODE_PRIVATE);
-            prefs.edit().putString("hazards", json).apply();
+
+            SharedPreferences prefs =
+                    getSharedPreferences("nav", MODE_PRIVATE);
+
+            prefs.edit()
+                    .putString("hazards", json)
+                    .apply();
         }
     }
 
     @Override
     protected void onDestroy() {
+
         if (webView != null) {
             webView.destroy();
         }
+
         super.onDestroy();
     }
 }
