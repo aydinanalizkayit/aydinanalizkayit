@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Canlı Navigasyon</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+html,body,#map{height:100%;margin:0}
+#panel{position:fixed;z-index:9999;top:10px;left:10px;right:10px;background:#fff;padding:10px;border-radius:10px;box-shadow:0 2px 10px #0003;font-family:Arial}
+button{padding:10px 12px;margin:3px;border:0;border-radius:8px;background:#1976d2;color:#fff}
+</style>
+</head>
+<body>
+<div id="panel">
+  <b>🧭 Canlı Navigasyon</b><br>
+  <button onclick="startBackground()">ARKA PLAN NAVİGASYONUNU BAŞLAT</button>
+  <button onclick="stopBackground()">DURDUR</button>
+  <span id="status">Hazır</span>
+</div>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const map=L.map('map').setView([37.0,35.3],10);
+
+L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}',{
+  maxZoom:20,
+  subdomains:['mt0','mt1','mt2','mt3'],
+  attribution:'Google'
+}).addTo(map);
+
+let hazards=JSON.parse(localStorage.getItem('hazards')||'[]');
+
+function syncHazards(){
+  localStorage.setItem('hazards',JSON.stringify(hazards));
+  if(window.AndroidNav) AndroidNav.saveHazards(JSON.stringify(hazards));
+}
+
+function startBackground(){
+  syncHazards();
+  if(window.AndroidNav) AndroidNav.startService();
+  document.getElementById('status').textContent=' Arka plan GPS aktif';
+}
+
+function stopBackground(){
+  if(window.AndroidNav) AndroidNav.stopService();
+  document.getElementById('status').textContent=' Durduruldu';
+}
+
+navigator.geolocation.watchPosition(
+  p=>{
+    const lat=p.coords.latitude, lng=p.coords.longitude;
+    map.setView([lat,lng],16);
+  },
+  e=>console.log(e),
+  {enableHighAccuracy:true,maximumAge:1000,timeout:10000}
+);
+</script>
+</body>
+</html>
